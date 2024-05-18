@@ -1,0 +1,11 @@
+
+*.DS_Store
+*.RData
+*.pdf
+*.mp4
+*.Rproj
+.Rproj.user
+/videos
+/new folder
+/images
+*.history

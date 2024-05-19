@@ -2,8 +2,15 @@ resample <- function(x, ...) {
 	return(x[sample.int(length(x), ...)])
 }
 
-distribute <- function(n, k) {
-	return(rmultinom(1, n, rep(1, k))[, 1])
+distribute <- function(n, k, w = NULL) {
+
+	if (is.null(w)) {
+		weights <- rep(1, k)
+	} else {
+		weights <- w
+	}
+
+	return(rmultinom(1, n, weights)[, 1])
 }
 
 distribute_territories <- function() {
@@ -37,15 +44,19 @@ choose_army <- function() {
 }
 
 reinforce_troops <- function() {
-	ik <- which(control == army)
-	nk <- length(ik)
-	n_troops <- max(nk %/% 3, 3)
+	army_territory <- which(control == army)
+	army_size <- length(army_territory)
+	n_troops <- max(army_size %/% 3, 3)
 
 	control_regions <- sapply(regions, \(region) all(control[region] == army))
 	n_troops <- n_troops + sum(regions_bonus[control_regions])
 
+	border_territory <- sapply(army_territory, \(i)
+		sum(troops[connections[[i]][control[connections[[i]]] != army]])
+	)
+
 	new <- numeric(n_territories)
-	new[ik] <- distribute(n_troops, nk)
+	new[army_territory] <- distribute(n_troops, army_size, border_territory)
 
 	return(new)
 }
@@ -96,7 +107,7 @@ battle <- function() {
 		} else if (troops_battle[2] == 0) {
 			battle_over <- TRUE
 			atk_won <- TRUE
-			troops_battle[2] <- min(troops_battle[1] %/% 2, troops_battle[3])
+			troops_battle[2] <- max(troops_battle[1] %/% 2, troops_battle[3])
 			troops_battle[1] <- troops_battle[1]  - troops_battle[2]
 		}
 	}

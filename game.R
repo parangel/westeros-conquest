@@ -32,62 +32,68 @@ set.seed(1715979728)
 turn_weights <- rep(n_armies, n_armies)
 control      <- distribute_territories()
 troops       <- deploy_troops(71)
-new_turn     <- TRUE
 army         <- NA
-
-dir.create("images/game", showWarnings = FALSE)
-png("images/game/%05d.png", width = 480, height = 1038)
-par(mai = rep(0, 4))
-plot_map(army_col, FALSE, FALSE)
 
 
 # ----
 
+dir.create("images/game", showWarnings = FALSE)
+png("images/game/%06d.png", width = 480, height = 1038)
+par(mai = rep(0, 4))
+plot_map(army_col, FALSE, FALSE)
+
+new_turn     <- TRUE
 while (new_turn) {
 	turn <- choose_army()
 	army <- turn$army
 	turn_weights <- turn$weights
 
-	troops      <- troops + reinforce_troops()
-	battlefield <- choose_battlefield()
+	troops <- troops + reinforce_troops()
+	same_army <- TRUE
 
-	if (is.null(battlefield)) {
-		if (!army %in% armies) {
-			cat("Army defeated.\n")
-			browser()
-		} else if (all(control != army)) {
-			armies <- setdiff(armies, army)
-			cat("Army defeated.\n")
-			browser()
-		} else if (length(armies) == 1) {
-			cat("Army won.\n")
-			browser()
-			new_turn <- FALSE
-		}
+	while (same_army) {
+		battlefield <- choose_battlefield()
 
-	} else {
-		if (control[battlefield[1]] == control[battlefield[2]]) {
-			browser()
-		}
+		if (is.null(battlefield)) {
+			same_army <- FALSE
 
-		battle_result <- battle()
-
-		troops[battlefield] <- battle_result$troops
-
-		if (battle_result$attacker_won) {
-			defeated <- control[battlefield[2]]
-			control[battlefield[2]] <- army
-
-			plot_map(army_col, FALSE, FALSE)
-
-			if (!any(control == defeated)) {
-				cat(sprintf("%s was defeated.\n", armies_name[defeated]))
-				armies <- setdiff(armies, defeated)
+			if (!army %in% armies) {
+				cat("Army defeated.\n")
+				browser()
+			} else if (all(control != army)) {
+				armies <- setdiff(armies, army)
+				cat("Army defeated.\n")
+				browser()
+			} else if (length(armies) == 1) {
+				cat("Army won.\n")
+				browser()
 				new_turn <- FALSE
+			}
 
-				if (length(armies) == 1) {
-					cat(sprintf("%s won.\n", armies_name[army]))
-					new_turn <- FALSE
+		} else {
+			if (control[battlefield[1]] == control[battlefield[2]]) {
+				browser()
+			}
+
+			battle_result <- battle()
+			troops[battlefield] <- battle_result$troops
+
+			if (battle_result$attacker_won) {
+				defeated <- control[battlefield[2]]
+				# turn_weights[defeated] <- turn_weights[defeated] + 1
+				control[battlefield[2]] <- army
+
+				plot_map(army_col, FALSE, FALSE)
+
+				if (!any(control == defeated)) {
+					# cat(sprintf("%s was defeated.\n", armies_name[defeated]))
+					armies <- setdiff(armies, defeated)
+
+					if (length(armies) == 1) {
+						# cat(sprintf("%s won.\n", armies_name[army]))
+						new_turn <- FALSE
+						same_army <- FALSE
+					}
 				}
 			}
 		}

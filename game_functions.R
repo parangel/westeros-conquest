@@ -12,7 +12,7 @@ distribute_territories <- function() {
 	return(x)
 }
 
-distribute_troops <- function(m) {
+deploy_troops <- function(m) {
 	troops <- numeric(n_territories)
 
 	for (k in seq_len(n_armies)) {
@@ -33,16 +33,16 @@ choose_army <- function() {
 	new_weights <- turn_weights + 1
 	new_weights[new_army] <- 0
 
-	return(list(army = new_army, turn_weights = new_weights))
+	return(list(army = new_army, weights = new_weights))
 }
 
-deploy_troops <- function() {
+reinforce_troops <- function() {
 	ik <- which(control == army)
-	nk <- length(i)
-	n_troops <- max(n %/% 3, 3)
+	nk <- length(ik)
+	n_troops <- max(nk %/% 3, 3)
 
-	control_houses <- sapply(houses, \(house) all(control[house] == army))
-	n_troops <- n_troops + sum(house_bonus[control_houses])
+	control_regions <- sapply(regions, \(region) all(control[region] == army))
+	n_troops <- n_troops + sum(regions_bonus[control_regions])
 
 	new <- numeric(n_territories)
 	new[ik] <- distribute(n_troops, nk)
@@ -67,9 +67,9 @@ choose_battlefield <- function() {
 	return(NULL)
 }
 
-roll_dice <- function() {
-	atk <- min(troops_battle[1] - 1, 3)
-	def <- min(troops_battle[2], 2)
+roll_dice <- function(x) {
+	atk <- min(x[1] - 1, 3)
+	def <- min(x[2], 2)
 
 	n_dice <- min(atk, def)
 	datk <- sort(sample(6, atk, TRUE), decreasing = TRUE)[1:n_dice]
@@ -77,8 +77,8 @@ roll_dice <- function() {
 	dice_diff <- sum(datk > ddef)
 
 	return(c(
-		troops_battle[1] - (n_dice - dice_diff),
-		troops_battle[2] - dice_diff,
+		x[1] - (n_dice - dice_diff),
+		x[2] - dice_diff,
 		atk))
 }
 
@@ -101,5 +101,36 @@ battle <- function() {
 		}
 	}
 
-	return(list(attacker_won = atk_won, troops = troops_battle))
+	return(list(attacker_won = atk_won, troops = troops_battle[1:2]))
+}
+
+plot_map <- function(plot_col = NULL, plot_num = TRUE, plot_conn = TRUE) {
+	plot_blank(map)
+
+	if (plot_conn) {
+		for (i in seq_along(map)) {
+			for (j in connections[[i]]) {
+				lines(
+					territories_coords$x[c(i, j)],
+					territories_coords$y[c(i, j)],
+					col = "#c7c7c7"
+				)
+			}
+		}
+	}
+
+	if (is.null(plot_col) | length(plot_col) < n_armies) {
+		plot_polygons(map, "#c7c7c7", "#ffffff")
+	} else {
+		for (k in unique(control)) {
+			plot_polygons(map[control == k], army_col[k], "#ffffff")
+		}
+	}
+
+	if (plot_num) {
+		text(
+			territories_coords$x, territories_coords$y,
+			labels = troops, cex = .8
+		)
+	}
 }

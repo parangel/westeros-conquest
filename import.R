@@ -69,12 +69,12 @@ names(new_houses) <- names(houses)
 houses <- new_houses
 
 n <- length(map)
-regions_xy <- matrix(nrow = n, ncol = 2)
-for (i in 1:n) {
-	path <- map[[i]]
-	regions_xy[i, ] <- c(mean(rangex(path)), mean(rangey(path)))
-}
 
-regions <- readLines("data/regions.txt")
+territories <- readLines("data/territories.txt")
 
-save(map, regions, regions_xy, houses, file = "data.RData")
+territories_coords <- data.frame(
+	x = sapply(map, \(x) mean(rangex(x))),
+	y = sapply(map, \(x) mean(rangey(x)))
+)
+
+save(map, territories, territories_coords, houses, file = "data.RData")

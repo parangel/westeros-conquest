@@ -10,17 +10,17 @@ col_houses <- c("#f7f7ff", "#708090", "#87ceeb", "#4b61d1", "#9a861c",
 	par(mar = c(0, 0, 1, 0))
 
 	plot_blank(map, "Westeros")
-	plot_polygons(map, "#c6c6c6", "#ffffff")
+	plot_polygons(map, "#cacbcf", "#ffffff")
 
 	dev.off()
 
-	pdf("images/map.pdf", 7, 14)
+	pdf("images/Territories.pdf", 7, 14)
 	par(mar = c(0, 0, 1, 0))
 
 	for (h in seq_along(houses)) {
 		for (i in houses[[h]]) {
-			plot_blank(map, regions[i])
-			plot_polygons(map, "#ffffff", "#c7c7c7")
+			plot_blank(map, territories[i])
+			plot_polygons(map[-i], "#ffffff", "#c7c7c7")
 			plot_polygons(map[[i]], col_houses[h], "#c7c7c7")
 		}
 	}
@@ -39,14 +39,19 @@ col_houses <- c("#f7f7ff", "#708090", "#87ceeb", "#4b61d1", "#9a861c",
 	}
 
 	for (h in seq_along(houses)) {
-		k <- houses[[h]]
-		plot_blank(map[k])
+		house <- houses[[h]]
+		plot_blank(map[house])
 
-		for (i in k) {
+		for (i in house) {
 			path <- map[[i]]
 			plot_polygons(path, NA, "#c7c7c7")
-			text(mean(rangex(path)), mean(rangey(path)), labels = i)
 		}
+
+		text(
+			territories_coords$x[house],
+			territories_coords$y[house],
+			labels = house
+		)
 	}
 
 	dev.off()

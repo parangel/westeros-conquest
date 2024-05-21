@@ -116,18 +116,14 @@ battle <- function() {
 }
 
 plot_map <- function(
-		map_type    = NA,
+		map_lim     = NULL,
 		plot_col    = NULL,
 		plot_border = "#ffffff",
 		plot_num    = FALSE,
 		plot_conn   = FALSE
 	) {
 
-	if (map_type == "westeros") {
-		plot_westeros(map)
-	} else {
-		plot_blank(map)
-	}
+	plot_blank(map, map_lim)
 
 	if (plot_conn) {
 		for (i in seq_along(map)) {

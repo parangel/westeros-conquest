@@ -18,15 +18,15 @@ rangey <- function(data) {
 }
 
 
-plot_blank <- function(region, main = NULL) {
-	plot(0, 0, xlim = rangex(region), ylim = rangey(region),
+plot_blank <- function(region, map_lim = NULL, main = NULL) {
+	if (is.null(map_lim)) {
+		map_lim <- list(rangex(region), rangey(region))
+	}
+
+	plot(0, 0, xlim = map_lim[[1]], ylim = map_lim[[2]],
 		main = main, type = "n", asp = 1, axes = FALSE)
 }
 
-plot_westeros <- function(region, main = NULL) {
-	plot(0, 0, xlim = c(0.40, 572.19), ylim = c(20.415, 1395.334),
-		main = main, type = "n", asp = 1, axes = FALSE)
-}
 
 plot_polygons <- function(region, col = "grey", border = "black") {
 	if (!is.list(region)) {

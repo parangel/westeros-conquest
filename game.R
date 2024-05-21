@@ -1,7 +1,7 @@
-dir.create(path, showWarnings = FALSE)
-png(paste0(path, "%d.png"), width = 620, height = 1240)
+# dir.create(path, showWarnings = FALSE)
+# png(paste0(path, "%d.png"), width = 620, height = 1240)
 par(mai = rep(0, 4), bg = "#252525")
-plot_map(map_type, army_col, "#252525")
+plot_map(westeros_lim, army_col, "#252525")
 
 new_turn <- TRUE
 while (new_turn) {
@@ -26,7 +26,7 @@ while (new_turn) {
 
 			turn_weights[defeated] <- turn_weights[defeated] + runif(1)
 
-			# plot_territory(battlefield[2], army_col[army], "#252525")
+			plot_territory(battlefield[2], army_col[army], "#252525")
 
 
 			if (!any(control == defeated)) {
@@ -42,9 +42,9 @@ while (new_turn) {
 		}
 	}
 
-	plot_map(map_type, army_col, "#252525")
+	# plot_map(westeros_lim, army_col, "#252525")
 
-	# Sys.sleep(sleep_time)
+	Sys.sleep(sleep_time)
 }
 
-dev.off()
+# dev.off()

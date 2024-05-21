@@ -19,14 +19,14 @@ distribute_territories <- function() {
 	return(x)
 }
 
-deploy_troops <- function(m) {
+deploy_troops <- function(m = 0) {
 	troops <- numeric(n_territories)
 
 	for (k in seq_len(n_armies)) {
 		ik <- which(control == k)
 		nk <- length(ik)
 		if (nk > 0) {
-			troops[ik] <- 1 + distribute(m - nk, nk)
+			troops[ik] <- 1 + distribute(max(0, m - nk), nk)
 		}
 	}
 
@@ -34,10 +34,10 @@ deploy_troops <- function(m) {
 }
 
 choose_army <- function() {
+	new_weights <- turn_weights + runif(n_armies)
 	new_armies <- setdiff(armies, army)
 
-	new_army <- resample(new_armies, 1, prob = turn_weights[new_armies] ^ 2)
-	new_weights <- turn_weights + 1
+	new_army <- new_armies[which.max(new_weights[new_armies])]
 	new_weights[new_army] <- 0
 
 	return(list(army = new_army, weights = new_weights))
@@ -115,8 +115,19 @@ battle <- function() {
 	return(list(attacker_won = atk_won, troops = troops_battle[1:2]))
 }
 
-plot_map <- function(plot_col = NULL, plot_num = TRUE, plot_conn = TRUE) {
-	plot_blank(map)
+plot_map <- function(
+		map_type    = NA,
+		plot_col    = NULL,
+		plot_border = "#ffffff",
+		plot_num    = FALSE,
+		plot_conn   = FALSE
+	) {
+
+	if (map_type == "westeros") {
+		plot_westeros(map)
+	} else {
+		plot_blank(map)
+	}
 
 	if (plot_conn) {
 		for (i in seq_along(map)) {
@@ -131,10 +142,10 @@ plot_map <- function(plot_col = NULL, plot_num = TRUE, plot_conn = TRUE) {
 	}
 
 	if (is.null(plot_col) | length(plot_col) < n_armies) {
-		plot_polygons(map, "#c7c7c7", "#ffffff")
+		plot_polygons(map, "#c7c7c7", plot_border)
 	} else {
 		for (k in unique(control)) {
-			plot_polygons(map[control == k], army_col[k], "#ffffff")
+			plot_polygons(map[control == k], army_col[k], plot_border)
 		}
 	}
 
@@ -144,4 +155,12 @@ plot_map <- function(plot_col = NULL, plot_num = TRUE, plot_conn = TRUE) {
 			labels = troops, cex = .8
 		)
 	}
+}
+
+plot_territory <- function(
+		territory,
+		plot_col = "#c7c7c7",
+		plot_border = "#ffffff"
+	) {
+	plot_polygons(map[[territory]], plot_col, plot_border)
 }
